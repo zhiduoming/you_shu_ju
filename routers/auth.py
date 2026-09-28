@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from starlette.formparsers import FormMessage
 
 from database import get_db
 from models import User
 from schemas import UserRegister, UserResponse, TokenResponse, UserLogin
-from security import hash_password, verify_password, create_access_token
+from security import hash_password, verify_password, create_access_token, get_current_user
 
 router=APIRouter(
     prefix="/auth",
@@ -64,3 +63,10 @@ async def login(
         username=user.username
     )
     return TokenResponse(access_token=access_token)
+
+
+@router.get("/me",response_model=UserResponse)
+async def get_me(
+        current_user: User = Depends(get_current_user),
+):
+    return current_user
